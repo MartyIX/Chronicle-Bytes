@@ -52,11 +52,16 @@ public interface Bytes<Underlying> extends
      * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
+        //System.out.println("Bytes.elasticByteBuffer()");
         return elasticByteBuffer(DEFAULT_BYTE_BUFFER_CAPACITY);
     }
 
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
+        //System.out.println("Bytes.elasticByteBuffer(initialCapacity, maxSize)");
         @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxSize);
+
+        //System.out.println("Bytes.elasticByteBuffer(): toString: " + bs.toString());
+
         try {
             return bs.bytesForWrite();
         } finally {
@@ -69,6 +74,7 @@ public interface Bytes<Underlying> extends
      * the given initial capacity.
      */
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
+        //System.out.println("Bytes.elasticByteBuffer(initialCapacity): " + MAX_BYTE_BUFFER_CAPACITY);
         return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
     }
 
@@ -234,6 +240,8 @@ public interface Bytes<Underlying> extends
             @NotNull final StringBuilder builder = new StringBuilder();
             try {
                 buffer.readWithLength(length, b -> {
+                    //System.out.println("Bytes.toString():  " + MAX_BYTE_BUFFER_CAPACITY);
+
                     while (buffer.readRemaining() > 0) {
                         if (builder.length() >= maxLen) {
                             builder.append("...");

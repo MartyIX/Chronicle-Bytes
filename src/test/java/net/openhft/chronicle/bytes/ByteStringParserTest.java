@@ -176,13 +176,16 @@ public class ByteStringParserTest   {
 
     @Test
     public void testAppendParseUTF() throws IOException {
+        //System.out.println("ByteStringParserTest.testAppendParseUTF()");
         @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (@NotNull String word : words) {
+            //System.out.println("ByteStringParserTest.testAppendParseUTF(): Append word: " + word);
             bytes.append(word).append('\t');
         }
         bytes.append('\t');
 
         for (String word : words) {
+            //System.out.println("ByteStringParserTest.testAppendParseUTF(): parseUtf8 to assert word: " + word);
             assertEquals(word, bytes.parseUtf8(CONTROL_STOP));
         }
         assertEquals("", bytes.parseUtf8(CONTROL_STOP));
@@ -220,6 +223,8 @@ public class ByteStringParserTest   {
         bytes.write("Hello World\n".getBytes(ISO_8859_1), 0, 10);
         bytes.write("good bye\n".getBytes(ISO_8859_1), 4, 4);
         bytes.write(4, "0 w".getBytes(ISO_8859_1));
+
+        //System.out.println("ByteStringParserTest.testWriteBytes(): "  +bytes.toString());
 
         assertEquals("Hell0 worl bye", bytes.parseUtf8(CONTROL_STOP));
     }

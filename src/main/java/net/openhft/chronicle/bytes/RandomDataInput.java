@@ -401,6 +401,7 @@ public interface RandomDataInput extends RandomCommon {
      */
     default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+        //System.out.println("RandomDataInput.readUtf8[RandomDataInput](offset:" + offset + ", sb)");
         AppendableUtil.setLength(sb, 0);
         // TODO insert some bounds check here
 
@@ -425,10 +426,13 @@ public interface RandomDataInput extends RandomCommon {
                 utfLen = ~utfLen;
             }
         }
-        if (utfLen == -1)
+        if (utfLen == -1) {
+            //System.out.println("RandomDataInput.readUtf8[RandomDataInput](-): utfLen=-1: " + ~offset);
             return ~offset;
+        }
         int len = Maths.toUInt31(utfLen);
         BytesInternal.parseUtf8(this, offset, sb, len);
+        //System.out.println("RandomDataInput.readUtf8[RandomDataInput](-): " + (offset + utfLen));
         return offset + utfLen;
     }
 
@@ -453,6 +457,7 @@ public interface RandomDataInput extends RandomCommon {
             long offset, @NotNull ACS sb, int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
             IllegalStateException {
+        //System.out.println("RandomDataInput.readUtf8Limited[RandomDataInput](offset:" + offset + ", db, maxUtf8Len:" + maxUtf8Len + ")");
         AppendableUtil.setLength(sb, 0);
         // TODO insert some bounds check here
 
@@ -483,6 +488,7 @@ public interface RandomDataInput extends RandomCommon {
             throw new IllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
         BytesInternal.parseUtf8(this, offset, sb, (int) utfLen);
+        //System.out.println("RandomDataInput.readUtf8Limited[RandomDataInput](-):" + (offset+utfLen));
         return offset + utfLen;
     }
 
