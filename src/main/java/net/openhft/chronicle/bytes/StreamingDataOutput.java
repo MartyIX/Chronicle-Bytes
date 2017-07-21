@@ -262,7 +262,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S writeSome(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes)
             throws BufferOverflowException {
         long length = Math.min(bytes.readRemaining(), writeRemaining());
-        if (length + writePosition() >= 1<< 20)
+        if (length + writePosition() >= 1 << 20)
             length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
         write(bytes, bytes.readPosition(), length);
         if (length == bytes.readRemaining()) {
@@ -349,6 +349,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @org.jetbrains.annotations.NotNull
     default S appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
+        System.out.println("StreamingDataOutput.appendUtf8(char[] chars, offset:" + offset + ", length:" + length + ")");
         int i;
         ascii:
         {
@@ -358,12 +359,100 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
                     break ascii;
                 writeByte((byte) c);
             }
+
+            System.out.println("StreamingDataOutput.appendUtf8(-)[ascii path]");
             return (S) this;
         }
         for (; i < length; i++) {
             char c = chars[offset + i];
             BytesInternal.appendUtf8Char(this, c);
         }
+
+        System.out.println("StreamingDataOutput.appendUtf8(-)[utf8 path]");
+        return (S) this;
+    }
+
+
+    // length is number of character (not bytes)
+    @org.jetbrains.annotations.NotNull
+    default S appendUtf8(byte[] chars, int offset, int length, byte coder)
+            throws BufferOverflowException, IllegalArgumentException {
+        System.out.println("StreamingDataOutput.appendUtf8(byte[] chars, offset:" + offset + ", length:" + length + ", coder:"+coder+")");
+        // https://sjohannes.wordpress.com/2009/05/18/utf-8-explained/
+
+        if (coder == 0) { // LATIN1
+            for (int i = 0; i < length; i++) {
+                byte b = chars[offset + i];
+                char c = (char)b;
+                System.out.println("StreamingDataOutput.appendUtf8(): [ASCII] [#"+i+"] " + c + "; " + c);
+                writeByte(b);
+            }
+        } else { // UTF16
+            for (int i = 0; i < 2*length; i+=2) {
+                byte b1 = chars[2*offset + i];
+                byte b2 = chars[2*offset + i + 1];
+
+                int uBE = ((b2 & 0xFF) << 8) | b1 & 0xFF; // @todo check behavior of "& 0xFF"
+                char c = (char)uBE;
+                System.out.println("StreamingDataOutput.appendUtf8(): [UTF16] " + c + "; " + c);
+
+                // Pound sign: https://unicode-table.com/en/00A3/
+                // Euro sign: https://unicode-table.com/en/20AC/
+                BytesInternal.appendUtf8Char(this, uBE);
+            }
+        }
+
+        System.out.println("StreamingDataOutput.appendUtf8(-)");
+        return (S) this;
+    }
+
+    @org.jetbrains.annotations.NotNull
+    default S appendUtf8(byte[] chars, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException {
+        System.out.println("StreamingDataOutput.appendUtf8(chars, offset:" + offset + ", length:" + length + ")");
+        // https://sjohannes.wordpress.com/2009/05/18/utf-8-explained/
+
+        for (int i = 0; i < length; i++) {
+            int b = chars[offset+i] & 0xFF; // unsigned byte
+            System.out.println("StreamingDataOutput.appendUtf8(): b=" + Integer.toHexString(b));
+
+            if (b >= 0xF0) {
+                System.out.println("StreamingDataOutput.appendUtf8(): [0xF0]");
+
+                int b2 = chars[offset+i+1] & 0xFF; // unsigned byte
+                int b3 = chars[offset+i+2] & 0xFF; // unsigned byte
+                int b4 = chars[offset+i+3] & 0xFF; // unsigned byte
+                this.writeByte((byte) b4);
+                this.writeByte((byte) b3);
+                this.writeByte((byte) b2);
+                this.writeByte((byte) b);
+
+                i+= 3;
+            } else if (b >= 0xE0) {
+                System.out.println("StreamingDataOutput.appendUtf8(): [0xE0]");
+
+                int b2 = chars[offset+i+1] & 0xFF; // unsigned byte
+                int b3 = chars[offset+i+2] & 0xFF; // unsigned byte
+                this.writeByte((byte) b3);
+                this.writeByte((byte) b2);
+                this.writeByte((byte) b);
+
+                i+= 2;
+            } else if (b >= 0xC0) {
+                System.out.println("StreamingDataOutput.appendUtf8(): [0xC0]");
+
+                int b2 = chars[offset+i + 1] & 0xFF; // unsigned byte
+                this.writeByte((byte) b2);
+                this.writeByte((byte) b);
+
+                i+= 1;
+            } else {
+                System.out.println("StreamingDataOutput.appendUtf8(): [ascii] " + Integer.toBinaryString((byte) b));
+                this.writeByte((byte) b);
+            }
+        }
+
+        System.out.println("StreamingDataOutput.appendUtf8(-)");
         return (S) this;
     }
 

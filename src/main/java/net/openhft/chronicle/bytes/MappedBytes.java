@@ -29,6 +29,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -293,10 +294,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
-        char[] chars = extractChars(s);
-        long utfLength = AppendableUtil.findUtf8Length(chars);
-        writeStopBit(utfLength);
-        appendUtf8(chars, 0, chars.length);
+        byte[] chars = extractChars(s);
+        byte coder = StringUtils.getStringCoder(s);
+        //long utfLength = AppendableUtil.findUtf8Length(chars);
+        writeStopBit(s.length());
+        appendUtf8(chars, 0, chars.length, coder);
         return this;
     }
 
@@ -316,7 +318,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     private MappedBytes append8bit0(String s, int start, int length) {
-        char[] chars = StringUtils.extractChars(s);
+        byte[] chars = StringUtils.extractChars(s);
         long address = address(writePosition());
         Memory memory = bytesStore().memory;
         int i = 0;
@@ -329,8 +331,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             address += 4;
         }
         for (; i < length; i++) {
-            char c = chars[i + start];
-            memory.writeByte(address++, (byte) c);
+            byte c = chars[i + start];
+            memory.writeByte(address++, c);
         }
         writeSkip(length);
         return this;
@@ -348,25 +350,25 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             return this;
         }
 
-        char[] chars = StringUtils.extractChars((String) cs);
+        byte[] chars = StringUtils.extractChars((String) cs);
         long address = address(pos);
         Memory memory = OS.memory();
         int i = 0;
         non_ascii:
         {
             for (; i < length; i++) {
-                char c = chars[i + start];
+                byte c = chars[i + start];
                 if (c > 127) {
                     writeSkip(i);
                     break non_ascii;
                 }
-                memory.writeByte(address++, (byte) c);
+                memory.writeByte(address++, c);
             }
             writeSkip(length);
             return this;
         }
         for (; i < length; i++) {
-            char c = chars[i + start];
+            byte c = chars[i + start];
             appendUtf8(c);
         }
         return this;

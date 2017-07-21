@@ -49,12 +49,16 @@ public enum AppendableUtil {
     @ForceInline
     public static void setLength(@NotNull Appendable sb, int newLength)
             throws BufferUnderflowException, IllegalArgumentException {
+        System.out.println("AppendableUtil.setLength(sb: "+sb.toString()+", newLength:"+newLength+")");
+
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
         else if (sb instanceof Bytes)
             ((Bytes) sb).readPositionRemaining(0, newLength);
         else
             throw new IllegalArgumentException("" + sb.getClass());
+
+        System.out.println("AppendableUtil.setLength(-)");
     }
 
     public static void append(@NotNull Appendable sb, double value)
@@ -237,6 +241,61 @@ public enum AppendableUtil {
                 utflen += 2;
             }
         }
+        return utflen;
+    }
+
+    public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull byte[] chars, byte coder) {
+        long utflen;
+        if (coder == 0) {
+            utflen = chars.length;
+        } else {
+            int strlen = chars.length;
+            utflen = 0;/* use charAt instead of copying String to char array */
+            for (int i = 0; i < strlen; i+=2) {
+                char c = (char)(((chars[i+1] & 0xFF) << 8) | (chars[i] & 0xFF));
+
+                if (c <= 0x007F) {
+                    utflen += 1;
+                    continue;
+                }
+                if (c <= 0x07FF) {
+                    utflen += 2;
+                } else {
+                    utflen += 3;
+                }
+            }
+        }
+
+        return utflen;
+    }
+
+    public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull byte[] chars) {
+        System.out.println("AppendableUtil.findUtf8Length() | strlen=" + chars.length);
+        long utflen = 0; /* use charAt instead of copying String to char array */
+        int strlen = chars.length;
+        for (int i = 0; i < strlen; i++) {
+            int c = chars[i] & 0xFF; // unsigned byte
+            System.out.println("AppendableUtil.findUtf8Length(): c=" + Integer.toHexString(c));
+
+            if (c == 0) { // we have hit end of string
+                break;
+            }
+
+            if (c >= 0xF0) {
+                utflen += 4;
+                i+= 3;
+            } else if (c >= 0xE0) {
+                utflen += 3;
+                i+= 2;
+            } else if (c >= 0xC0) {
+                utflen += 2;
+                i+= 1;
+            } else {
+                utflen += 1;
+            }
+        }
+
+        System.out.println("AppendableUtil.findUtf8Length(-):" + utflen);
         return utflen;
     }
 
