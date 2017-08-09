@@ -1,5 +1,9 @@
 #!/bin/bash
 
+(
+    ../Chronicle-Bytes/build9.sh
+)
+
 # Linux
 export JAVA_HOME=/home/marty/work/programs/jdk-9-ea
 export PATH=${JAVA_HOME}/bin:/home/marty/work/programs/apache-maven-3.5.0/bin:$PATH

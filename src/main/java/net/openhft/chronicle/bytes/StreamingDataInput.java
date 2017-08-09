@@ -174,32 +174,32 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
-        //System.out.println("StreamingDataInput.readUtf8(sb:" + sb.toString() + ")");
+        System.out.println("StreamingDataInput.readUtf8(sb:" + sb.toString() + ")");
 
         AppendableUtil.setLength(sb, 0);
 
-        //System.out.println("StreamingDataInput.readUtf8(): about to call: readRemaining()");
+        System.out.println("StreamingDataInput.readUtf8(): about to call: readRemaining()");
         if (readRemaining() <= 0) {
             // TODO throw BufferUnderflowException here? please review
             //System.out.println("StreamingDataInput.readUtf8(-):false");
             return false;
         }
 
-        //System.out.println("StreamingDataInput.readUtf8(): About to call: BytesInternal.readStopBit");
+        System.out.println("StreamingDataInput.readUtf8(): About to call: BytesInternal.readStopBit");
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1) {
-            //System.out.println("StreamingDataInput.readUtf8(-):false");
+            System.out.println("StreamingDataInput.readUtf8(-):false");
             return false;
         }
-        //System.out.println("StreamingDataInput.readUtf8(): len0 = " + len0);
+        System.out.println("StreamingDataInput.readUtf8(): len0 = " + len0);
 
-        //System.out.println("StreamingDataInput.readUtf8(): About to call: Maths.toUInt31");
+        System.out.println("StreamingDataInput.readUtf8(): About to call: Maths.toUInt31");
         int len = Maths.toUInt31(len0);
 
-        //System.out.println("StreamingDataInput.readUtf8(): About to call: BytesInternal.parseUtf8(sb, len:"+len+")");
+        System.out.println("StreamingDataInput.readUtf8(): About to call: BytesInternal.parseUtf8(sb, len:"+len+")");
         BytesInternal.parseUtf8(this, sb, len);
 
-        //System.out.println("StreamingDataInput.readUtf8(-):true");
+        System.out.println("StreamingDataInput.readUtf8(-):true");
         return true;
     }
 
@@ -301,8 +301,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     default void parseUtf8(Appendable sb, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
+        System.out.println("StreamingDataInput.parseUtf8(sb, length:"+length+")");
+
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUtf8(this, sb, length);
+
+        System.out.println("StreamingDataInput.parseUtf8(-)");
     }
 
     default long parseHexLong() {

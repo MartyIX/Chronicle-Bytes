@@ -545,8 +545,9 @@ enum BytesInternal {
             throws IOException, UTFDataFormatRuntimeException {
         System.out.println("BytesInternal.parseUtf82[x](offset:"+offset+", limit:"+limit+", utflen: "+utflen+")");
         while (offset < limit) {
-            int c = input.readUnsignedByte(offset++);
-            System.out.println("BytesInternal.parseUtf82[x](): bytes.readUnsignedByte -> " + c);
+            int c = input.readUnsignedByte(offset);
+            System.out.println("BytesInternal.parseUtf82[x](): [offset="+offset+", limit="+limit+"] bytes.readUnsignedByte -> " + c + "; " + Integer.toBinaryString(c));
+            offset++;
             switch (c >> 4) {
                 case 0:
                 case 1:
@@ -574,6 +575,7 @@ enum BytesInternal {
                                         " was " + char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
+                    System.out.println("BytesInternal.parseUtf82[x](): final char: " + (char)c2);
                     appendable.append((char) c2);
                     break;
                 }
@@ -581,7 +583,7 @@ enum BytesInternal {
                 case 14: {
                 /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     System.out.println("BytesInternal.parseUtf82[x](): 14 case");
-                    if (offset + 2 > limit)
+                    if (offset + 1 > limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
                     int char2 = input.readUnsignedByte(offset++);
@@ -595,6 +597,7 @@ enum BytesInternal {
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
                     appendable.append((char) c3);
+                    System.out.println("BytesInternal.parseUtf82[x](): final char: " + (char)c3);
                     break;
                 }
                 // TODO add code point of characters > 0xFFFF support.
@@ -609,7 +612,7 @@ enum BytesInternal {
 
     public static void writeUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes, @org.jetbrains.annotations.Nullable @Nullable String str)
             throws IllegalArgumentException, BufferOverflowException {
-        // System.out.println("writeUtf8(" + str + ")");
+        System.out.println("BytesInternal.writeUtf8(" + str + ")");
 
         if (str == null) {
             bytes.writeStopBit(-1);
@@ -621,13 +624,13 @@ enum BytesInternal {
         byte coder = StringUtils.getStringCoder(str);
         long utfLength = AppendableUtil.findUtf8Length(chars, coder);
 
-        //System.out.println("writeUtf8.str: " + str);
-        //System.out.println("writeUtf8.length: " + str.length());
-        //System.out.println("writeUtf8.bytes.length: " + utfLength);
+        System.out.println("BytesInternal.writeUtf8(): str: " + str);
+        System.out.println("BytesInternal.writeUtf8(): length: " + str.length());
+        System.out.println("BytesInternal.writeUtf8(): bytes.length: " + utfLength);
         bytes.writeStopBit(utfLength);
         bytes.appendUtf8(chars, 0, str.length(), coder);
 
-        //System.out.println("writeUtf8(-)");
+        System.out.println("BytesInternal.writeUtf8(-)");
     }
 
     @ForceInline
@@ -799,26 +802,26 @@ enum BytesInternal {
 
     public static void appendUtf8Char(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes, int c)
             throws BufferOverflowException {
-        // System.out.println("BytesInternal.appendUtf8Char(c: " + c + "; " + Integer.toBinaryString(c) + ")");
+         System.out.println("BytesInternal.appendUtf8Char(c: " + c + "; " + Integer.toBinaryString(c) + ")");
 
         if (c <= 0x007F) {
             bytes.writeByte((byte) c);
-            // System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) c) + " | " + (char)c);
+            System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) c) + " | " + (char)c);
         } else if (c <= 0x07FF) {
             bytes.writeByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
             bytes.writeByte((byte) (0x80 | c & 0x3F));
 
-            // System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) (0xC0 | ((c >> 6) & 0x1F))));
-            // System.out.println("BytesInternal.appendUtf8Char(): (2): " + Integer.toBinaryString((byte) (0x80 | c & 0x3F)));
+            System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) (0xC0 | ((c >> 6) & 0x1F))));
+            System.out.println("BytesInternal.appendUtf8Char(): (2): " + Integer.toBinaryString((byte) (0x80 | c & 0x3F)));
 
         } else if (c <= 0xFFFF) {
             bytes.writeByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
             bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
             bytes.writeByte((byte) (0x80 | (c & 0x3F)));
 
-            // System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) (0xE0 | ((c >> 12) & 0x0F))));
-            // System.out.println("BytesInternal.appendUtf8Char(): (2): " + Integer.toBinaryString((byte) (0x80 | ((c >> 6) & 0x3F))));
-            // System.out.println("BytesInternal.appendUtf8Char(): (3): " + Integer.toBinaryString((byte) (0x80 | (c & 0x3F))));
+            System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) (0xE0 | ((c >> 12) & 0x0F))));
+            System.out.println("BytesInternal.appendUtf8Char(): (2): " + Integer.toBinaryString((byte) (0x80 | ((c >> 6) & 0x3F))));
+            System.out.println("BytesInternal.appendUtf8Char(): (3): " + Integer.toBinaryString((byte) (0x80 | (c & 0x3F))));
 
         } else {
             bytes.writeByte((byte) (0xF0 | ((c >> 18) & 0x07)));
@@ -1621,14 +1624,14 @@ enum BytesInternal {
     @ForceInline
     public static String readUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
             throws BufferUnderflowException, IllegalArgumentException, IORuntimeException {
-        //System.out.println("BytesInternal.readUtf8()");
+        System.out.println("BytesInternal.readUtf8()");
 
         StringBuilder sb = acquireStringBuilder();
-        //System.out.println("BytesInternal.readUtf8(): acquired stringBuilder: " + sb.toString());
+        System.out.println("BytesInternal.readUtf8(): acquired stringBuilder: " + sb.toString());
 
         String s = in.readUtf8(sb) ? SI.intern(sb) : null;
 
-        //System.out.println("BytesInternal.readUtf8(-):" + s);
+        System.out.println("BytesInternal.readUtf8(-):" + s);
         return s;
     }
 

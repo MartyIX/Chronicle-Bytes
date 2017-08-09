@@ -383,9 +383,19 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         if (coder == 0) { // LATIN1
             for (int i = 0; i < length; i++) {
                 byte b = chars[offset + i];
-                char c = (char)b;
-                System.out.println("StreamingDataOutput.appendUtf8(): [ASCII] [#"+i+"] " + c + "; " + c);
-                writeByte(b);
+                int b2 = (b & 0xFF);
+                // char c = (char)b2;
+                // System.out.println("StreamingDataOutput.appendUtf8(): [ASCII] [#"+i+"] b="+b2+" -> " + c + "; " + Integer.toBinaryString(c));
+                // int unsignedB = (b & 0xFF);
+                //
+                // if (unsignedB <= 0x007F) {
+                //     writeByte(b);
+                // } else {
+                //     writeByte((byte) (0xC0 | ((b >> 6) & 0x1F)));
+                //     writeByte((byte) (0x80 | b & 0x3F));
+                // }
+
+                BytesInternal.appendUtf8Char(this, b2);
             }
         } else { // UTF16
             for (int i = 0; i < 2*length; i+=2) {
@@ -394,7 +404,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
                 int uBE = ((b2 & 0xFF) << 8) | b1 & 0xFF; // @todo check behavior of "& 0xFF"
                 char c = (char)uBE;
-                System.out.println("StreamingDataOutput.appendUtf8(): [UTF16] " + c + "; " + c);
+                System.out.println("StreamingDataOutput.appendUtf8(): [UTF16] " + c + "; " + Integer.toBinaryString(c));
 
                 // Pound sign: https://unicode-table.com/en/00A3/
                 // Euro sign: https://unicode-table.com/en/20AC/
