@@ -1,8 +1,5 @@
 #!/bin/bash
 
-(
-    ../Chronicle-Bytes/build9.sh
-)
 
 # Linux
 export JAVA_HOME=/home/marty/work/programs/jdk-9-ea

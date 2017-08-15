@@ -475,7 +475,12 @@ enum BytesInternal {
         System.out.println("BytesInternal.parseUtf82(utflen:"+utflen+", count:"+count+")");
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
-            System.out.println("BytesInternal.parseUtf82(): bytes.readUnsignedByte -> " + c);
+            System.out.println("BytesInternal.parseUtf82(): [utflen="+utflen+", count="+count+"] bytes.readUnsignedByte -> "
+                    + c
+                    + "; "
+                    + String.format("%02X ", c)
+                    + "; "
+                    + Integer.toBinaryString(c));
             if (c < 0)
                 break;
             switch (c >> 4) {
@@ -502,11 +507,26 @@ enum BytesInternal {
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
                     int char2 = bytes.readUnsignedByte();
+                    System.out.println("BytesInternal.parseUtf82(): Read another char: bytes.readUnsignedByte -> "
+                            + char2 + "; "
+                            + String.format("%02X ", char2)
+                            + "; " + Integer.toBinaryString(char2));
+
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input around byte " + count + " was " + char2);
-                    int c2 = (char) (((c & 0x1F) << 6) |
-                            (char2 & 0x3F));
+
+                    int c2 = (char) (((c & 0x1F) << 6) | (char2 & 0x3F));
+
+                    System.out.println("BytesInternal.parseUtf82(): [2 bytes]: "
+                            + String.format("%02X ", (byte) ((c & 0x1F) << 6))
+                            + "; "
+                            + String.format("%02X ", (byte) (char2 & 0x3F))
+                            + "; c2="
+                            + String.format("%02X ", (char) c2)
+                    );
+
+                    System.out.println("BytesInternal.parseUtf82(): final char: " + (char)c2);
                     appendable.append((char) c2);
                     break;
                 }
@@ -546,7 +566,12 @@ enum BytesInternal {
         System.out.println("BytesInternal.parseUtf82[x](offset:"+offset+", limit:"+limit+", utflen: "+utflen+")");
         while (offset < limit) {
             int c = input.readUnsignedByte(offset);
-            System.out.println("BytesInternal.parseUtf82[x](): [offset="+offset+", limit="+limit+"] bytes.readUnsignedByte -> " + c + "; " + Integer.toBinaryString(c));
+            System.out.println("BytesInternal.parseUtf82[x](): [offset="+offset+", limit="+limit+"] bytes.readUnsignedByte -> "
+                    + c
+                    + "; "
+                    + String.format("%02X ", c)
+                    + "; "
+                    + Integer.toBinaryString(c));
             offset++;
             switch (c >> 4) {
                 case 0:
@@ -569,13 +594,31 @@ enum BytesInternal {
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
                     int char2 = input.readUnsignedByte(offset++);
+                    System.out.println("BytesInternal.parseUtf82[x](): Read another char: bytes.readUnsignedByte -> "
+                            + char2
+                            + "; "
+                            + String.format("%02X ", char2)
+                            + "; " + Integer.toBinaryString(char2));
+
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input around byte " + (offset - limit + utflen) +
                                         " was " + char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
-                    System.out.println("BytesInternal.parseUtf82[x](): final char: " + (char)c2);
+
+                    // http://www.fileformat.info/info/unicode/char/0080/index.htm
+                    System.out.println("BytesInternal.parseUtf82[x](): [2 bytes]: "
+                            + String.format("%02X", (byte) ((c & 0x1F) << 6))
+                            + "; "
+                            + String.format("%02X ", (byte) (char2 & 0x3F))
+                    );
+
+                    System.out.println("BytesInternal.parseUtf82[x](): final char: "
+                            + (char)c2
+                            + "; c2="
+                            + String.format("%04X ", c2)
+                    );
                     appendable.append((char) c2);
                     break;
                 }
@@ -811,8 +854,17 @@ enum BytesInternal {
             bytes.writeByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
             bytes.writeByte((byte) (0x80 | c & 0x3F));
 
-            System.out.println("BytesInternal.appendUtf8Char(): (1): " + Integer.toBinaryString((byte) (0xC0 | ((c >> 6) & 0x1F))));
-            System.out.println("BytesInternal.appendUtf8Char(): (2): " + Integer.toBinaryString((byte) (0x80 | c & 0x3F)));
+            System.out.println("BytesInternal.appendUtf8Char(): (1): "
+                    + String.format("%02X ", (byte) (0xC0 | ((c >> 6) & 0x1F)))
+                    + "; "
+                    + Integer.toBinaryString((byte) (0xC0 | ((c >> 6) & 0x1F)))
+            );
+            
+            System.out.println("BytesInternal.appendUtf8Char(): (2): "
+                    + String.format("%02X ", (byte) (0x80 | c & 0x3F))
+                    + "; "
+                    + Integer.toBinaryString((byte) (0x80 | c & 0x3F))
+            );
 
         } else if (c <= 0xFFFF) {
             bytes.writeByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
@@ -829,8 +881,10 @@ enum BytesInternal {
             bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
             bytes.writeByte((byte) (0x80 | (c & 0x3F)));
 
-            // System.out.println("BytesInternal.appendUtf8Char(): (TODO): ");
+            System.out.println("BytesInternal.appendUtf8Char(): (TODO): ");
         }
+
+        System.out.println("BytesInternal.appendUtf8Char(-)");
     }
 
     public static long appendUtf8Char(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset, int c)
