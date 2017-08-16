@@ -147,11 +147,7 @@ public enum BytesUtil {
     public static void parseUtf8(
             @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException {
-        //System.out.println("BytesUtil.parseUtf8()");
-
         BytesInternal.parseUtf8(in, appendable, utflen);
-
-        //System.out.println("BytesUtil.parseUtf8(-)");
     }
 
     public static void appendUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, @org.jetbrains.annotations.NotNull @NotNull CharSequence cs) {

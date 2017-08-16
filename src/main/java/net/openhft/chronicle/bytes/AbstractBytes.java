@@ -162,14 +162,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public long readPosition() {
-        //System.out.println("AbstractBytes.readPosition():"+readPosition);
         return readPosition;
     }
 
     @Override
     @ForceInline
     public long writePosition() {
-        //System.out.println("AbstractBytes.writePosition():"+writePosition);
         return writePosition;
     }
 
@@ -193,7 +191,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> readPosition(long position) throws BufferUnderflowException {
-        //System.out.println("AbstractBytes.readPosition(position:"+position+")");
         if (position < start()) {
             throw new DecoratedBufferUnderflowException(
                     String.format("readPosition failed. Position: %d < start: %d", position, start()));
@@ -203,7 +200,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
                     String.format("readPosition failed. Position: %d > readLimit: %d", position, readLimit()));
         }
         this.readPosition = position;
-        //System.out.println("AbstractBytes.readPosition(-): readPosition:"+position);
         return this;
     }
 
@@ -246,9 +242,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> readSkip(long bytesToSkip)
             throws BufferUnderflowException {
-        //System.out.println("AbstractBytes.readSkip(bytesToSkip:"+bytesToSkip+")");
         readOffsetPositionMoved(bytesToSkip);
-        //System.out.println("AbstractBytes.readSkip(-)");
         return this;
     }
 
@@ -267,7 +261,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException {
-        //System.out.println("AbstractBytes.writeSkip(bytesToSkip:"+bytesToSkip+")");
         writeCheckOffset(writePosition, bytesToSkip);
         uncheckedWritePosition(writePosition + bytesToSkip);
         return this;
@@ -277,7 +270,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> writeLimit(long limit) throws BufferOverflowException {
-        //System.out.println("AbstractBytes.writeLimit(limit:"+limit+")");
         if (limit < start()) {
             throw new DecoratedBufferOverflowException(
                     String.format("writeLimit failed. Limit: %d < start: %d",
@@ -295,7 +287,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     void performRelease() {
-        //System.out.println("AbstractBytes.performRelease()");
         try {
             this.bytesStore.release();
         } finally {
@@ -305,16 +296,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int readUnsignedByte() {
-        //System.out.println("AbstractBytes.readUnsignedByte()");
         try {
             long offset = readOffsetPositionMoved(1);
-            //System.out.println("AbstractBytes.readUnsignedByte(): offset = " +offset);
-            int i = bytesStore.readUnsignedByte(offset);
-            //System.out.println("AbstractBytes.readUnsignedByte(-): i = " + i + " | " + Integer.toBinaryString(i));
-            return i;
+            return bytesStore.readUnsignedByte(offset);
 
         } catch (BufferUnderflowException e) {
-            //System.out.println("AbstractBytes.readUnsignedByte(-): [underflow] -1");
             return -1;
         }
     }
@@ -450,7 +436,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeByte(long offset, byte i)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("AbstractBytes.writeByte(offset:"+offset+", "+i+")");
         writeCheckOffset(offset, 1);
         bytesStore.writeByte(offset, i);
         return this;
@@ -461,7 +446,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeShort(long offset, short i)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("AbstractBytes.writeShort(offset:"+offset+", "+i+")");
         writeCheckOffset(offset, 2);
         bytesStore.writeShort(offset, i);
         return this;
@@ -472,7 +456,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeInt(long offset, int i)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("AbstractBytes.writeInt(offset:"+offset+", "+i+")");
         writeCheckOffset(offset, 4);
         bytesStore.writeInt(offset, i);
         return this;
@@ -483,7 +466,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeOrderedInt(long offset, int i)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("AbstractBytes.writeOrderedInt(offset:"+offset+", "+i+")");
         if (offset < 0) throw new IllegalArgumentException();
         writeCheckOffset(offset, 4);
         bytesStore.writeOrderedInt(offset, i);
@@ -495,7 +477,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeLong(long offset, long i)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("AbstractBytes.writeLong(offset:"+offset+", "+i+")");
         writeCheckOffset(offset, 8);
         bytesStore.writeLong(offset, i);
         return this;
@@ -535,7 +516,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes<Underlying> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("AbstractBytes.writeVolatileByte(offset:"+offset+", "+i8+")");
         writeCheckOffset(offset, 1);
         bytesStore.writeVolatileByte(offset, i8);
         return this;
@@ -573,7 +553,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("VanillaBytes.write(offsetInRDO, bytes[], offset, length)");
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -583,7 +562,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
-        //System.out.println("VanillaBytes.write(offsetInRDO, ByteBuffer bytes, offset, length)");
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
@@ -724,7 +702,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeByte(byte i8)
             throws BufferOverflowException {
-        //System.out.println("VanillaBytes.writeByte(i8:"+i8+")");
         long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
         return this;

@@ -43,26 +43,18 @@ public enum AppendableUtil {
     }
 
     public static void parseUtf8(@org.jetbrains.annotations.NotNull BytesStore bs, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
-        //System.out.println("AppendableUtil.parseUtf8(bs, sb, utflen:"+utflen+")");
-
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utflen);
-
-        //System.out.println("AppendableUtil.parseUtf8(-)");
     }
 
     @ForceInline
     public static void setLength(@NotNull Appendable sb, int newLength)
             throws BufferUnderflowException, IllegalArgumentException {
-        //System.out.println("AppendableUtil.setLength(sb: "+sb.toString()+", newLength:"+newLength+")");
-
-        if (sb instanceof StringBuilder) {
+        if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
-        } else if (sb instanceof Bytes)
+        else if (sb instanceof Bytes)
             ((Bytes) sb).readPositionRemaining(0, newLength);
         else
             throw new IllegalArgumentException("" + sb.getClass());
-
-        //System.out.println("AppendableUtil.setLength(-)");
     }
 
     public static void append(@NotNull Appendable sb, double value)
@@ -231,7 +223,6 @@ public enum AppendableUtil {
     }
 
     public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull CharSequence str) throws IndexOutOfBoundsException {
-        //System.out.println("AppendableUtil.findUtf8Length[CharSequence](str:"+str+")");
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
@@ -246,12 +237,10 @@ public enum AppendableUtil {
                 utflen += 2;
             }
         }
-        //System.out.println("AppendableUtil.findUtf8Length[CharSequence](-):" + utflen);
         return utflen;
     }
 
     public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull byte[] chars, byte coder) {
-        //System.out.println("AppendableUtil.findUtf8Length[byte chars](chars, coder:"+coder+")");
         long utflen;
 
         if (coder == 0) {
@@ -284,7 +273,6 @@ public enum AppendableUtil {
             }
         }
 
-        //System.out.println("AppendableUtil.findUtf8Length[byte chars](-):" + utflen);
         return utflen;
     }
 
@@ -294,7 +282,6 @@ public enum AppendableUtil {
         int strlen = chars.length;
         for (int i = 0; i < strlen; i++) {
             int c = chars[i] & 0xFF; // unsigned byte
-            //System.out.println("AppendableUtil.findUtf8Length(): c=" + Integer.toHexString(c));
 
             if (c == 0) { // we have hit end of string
                 break;
@@ -313,8 +300,6 @@ public enum AppendableUtil {
                 utflen += 1;
             }
         }
-
-        //System.out.println("AppendableUtil.findUtf8Length(-):" + utflen);
         return utflen;
     }
 

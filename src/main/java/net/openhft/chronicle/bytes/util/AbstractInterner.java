@@ -63,8 +63,6 @@ public abstract class AbstractInterner<T> {
 
     public T intern(@NotNull BytesStore cs, int length)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
-        //System.out.println("AbstractInterner.intern(cs, length:"+length+")");
-
         if (length> entries.length)
             return getValue(cs, length);
         int hash = hash32(cs, length);
@@ -81,8 +79,6 @@ public abstract class AbstractInterner<T> {
         @NotNull BytesStore bs = BytesStore.wrap(bytes);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
-
-        //System.out.println("AbstractInterner.intern(-)");
         return t;
     }
 

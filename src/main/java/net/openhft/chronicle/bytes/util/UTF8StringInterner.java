@@ -36,10 +36,8 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     @Override
     @NotNull
     protected String getValue(@NotNull BytesStore cs, int length) throws UTFDataFormatRuntimeException {
-        //System.out.println("UTF8StringInterner.getValue(cs, length:"+length+")");
         StringBuilder sb = SBP.acquireStringBuilder();
         AppendableUtil.parseUtf8(cs, sb, length);
-        //System.out.println("UTF8StringInterner.getValue(-):" + sb.toString());
         return sb.toString();
     }
 }

@@ -200,29 +200,20 @@ public class ByteStoreTest {
         bytes.writeUtf8(null);
         @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
-            //System.out.println("testWriteReadUtf8(): writeUtf8 word (1): " + word);
             bytes.writeUtf8(word);
         }
 
-        //System.out.println("Assert null (1.1)");
         assertEquals(null, bytes.readUtf8());
-
         for (String word : words) {
-            //System.out.println("testWriteReadUtf8(): Assert word (1.2) [start] Expected word:" + word);
             assertEquals(word, bytes.readUtf8());
-            //System.out.println("testWriteReadUtf8(): Assert word (1.2) [finish] Expected word:" + word);
         }
-        //System.out.println("testWriteReadUtf8(): Assert null (2)");
         assertEquals(null, bytes.readUtf8());
-        //System.out.println("testWriteReadUtf8(): Assert (3)");
         assertEquals(25, bytes.readPosition()); // check the size
 
         bytes.readPosition(0);
         @NotNull StringBuilder sb = new StringBuilder();
-        //System.out.println("testWriteReadUtf8(): Assert false (4)");
         Assert.assertFalse(bytes.readUtf8(sb));
         for (String word : words) {
-            //System.out.println("testWriteReadUtf8(): Assert word (5): " + word);
             Assert.assertTrue(bytes.readUtf8(sb));
             Assert.assertEquals(word, sb.toString());
         }

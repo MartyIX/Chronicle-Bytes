@@ -29,7 +29,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -295,8 +294,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
         byte[] chars = extractChars(s);
         byte coder = StringUtils.getStringCoder(s);
-        //long utfLength = AppendableUtil.findUtf8Length(chars);
-        writeStopBit(s.length());
+        long utfLength = AppendableUtil.findUtf8Length(chars, coder);
+        writeStopBit(utfLength);
         appendUtf8(chars, 0, chars.length, coder);
         return this;
     }

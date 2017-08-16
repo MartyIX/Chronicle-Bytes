@@ -25,7 +25,7 @@ java -version
 #mvn -Dmaven.javadoc.skip=true -DtrimStackTrace=false -Dsurefire.useFile=false -Dtest=net.openhft.chronicle.bytes.ByteStoreTest#testWriteReadUtf8 clean test
 
 # with tests
-# mvn -Dmaven.javadoc.skip=true -Dsurefire.useFile=false -DtrimStackTrace=false clean install
+mvn -Dmaven.javadoc.skip=true -Dsurefire.useFile=false -DtrimStackTrace=false clean install
 
 # without tests
-mvn -Dmaven.javadoc.skip=true -Dmaven.test.skip=true -Dsurefire.useFile=false -DtrimStackTrace=false clean install
+# mvn -Dmaven.javadoc.skip=true -Dmaven.test.skip=true -Dsurefire.useFile=false -DtrimStackTrace=false clean install
