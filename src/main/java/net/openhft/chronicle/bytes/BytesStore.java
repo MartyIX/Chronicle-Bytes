@@ -308,9 +308,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
             throws BufferUnderflowException {
-        return length == 8
-                ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
-                : BytesInternal.equalBytesAny(this, bytesStore, length);
+        if (length == 8) {
+            return readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition());
+        } else {
+            if (length() < length && length <= bytesStore.length()) {
+                return false;
+            } else {
+                return BytesInternal.equalBytesAny(this, bytesStore, length);
+            }
+        }
     }
 
     /**

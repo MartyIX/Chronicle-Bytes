@@ -343,6 +343,23 @@ public class BytesTest {
     }
 
     @Test
+    public void internRegressionTest() throws IORuntimeException {
+        UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
+
+        utf8StringInterner.intern(Bytes.from("DELEGATE: 912796UF4 Notional is > limit 25.00mm"));
+        utf8StringInterner.intern(Bytes.from("TW-TRSY-20181217-NY572677_3256N1"));
+        String intern = utf8StringInterner.intern(Bytes.from("TW-TRSY-20181217-NY572677_3256N15"));
+        assertThat(intern, is("TW-TRSY-20181217-NY572677_3256N15"));
+    }
+
+    @Test
+    public void testEqualBytesWithSecondStoreBeingLonger() throws IORuntimeException {
+        BytesStore store1 = Bytes.from("TW-TRSY-20181217-NY572677_3256N1");
+        BytesStore store2 = Bytes.from("TW-TRSY-20181217-NY572677_3256N15");
+        assertThat(store1.equalBytes(store2, 33), is(false));
+    }
+
+    @Test
     public void testStartsWith() {
         assertTrue(Bytes.from("aaa").startsWith(Bytes.from("a")));
         assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aa")));
